@@ -7,7 +7,7 @@ const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root", 
-    password: "YOURPASSWORDHERE", 
+    password: "PASSWORD", 
     database: "bamazon"
 });
 
@@ -117,7 +117,6 @@ const customer = {
                                         throw err;
                                     } else {
                                         console.log("\nInventory updated.\n"); 
-                                        displayInventory();
                                         customer.openCustomerInquirer();
                                     };
                                 });
@@ -230,10 +229,51 @@ const manager = {
     },
 
     addNewProduct: function() {
-        console.log("adding new product");
-        manager.openManagerInquirer();
+        inquirer.prompt([
+            {
+                type: "input",
+                message: "What is the name of the product you are adding to the inventory?",
+                name: "name" 
+            },
+            {
+                type: "input",
+                message: "What department does it belong to?",
+                name: "department"
+            },
+            {
+                type: "input",
+                message: "How much does each unit cost?",
+                name: "price"
+            },
+            {
+                type: "input",
+                message: "How many units are in stock?",
+                name: "quantity"
+            }
+        ]).then(function(response) {
+            newName = response.name;
+            newDepartment = response.department;
+            newPrice = parseFloat(response.price);
+            newQuantity = parseInt(response.quantity);
+            
+            connection.query("INSERT INTO products SET ?",
+            {
+                product_name: newName,
+                department_name: newDepartment,
+                price: newPrice,
+                stock_quantity: newQuantity
+            }, function (err, result) {
+                if (err) {
+                    throw err;
+                } else {
+                    console.log("\n" + newName + " successfully added to inventory.");
+                    console.log("\n");
+                    manager.openManagerInquirer();
+                };
+            });
+        });
     }
-}
+};
 
 connection.connect(function(err) {
     if (err) throw err;
